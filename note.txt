@@ -1,0 +1,23 @@
+Theme Color:
+#fdc128 - Orange
+#231f20 - Black
+complimentary color (green): #1be55dd, rgb(27, 229, 221), hsl(178, 80%, 50%)
+
+Product Categories:
+Toiletries
+Beverages
+Fashion
+Seafood
+Meat
+Bakery
+Nonfood & Pharmacy
+Prepared Food
+Health & Beauty
+Home & Office
+Phones & Tablets
+Computing
+Electronics
+Baby Products
+Gaming
+Sporting
+Automobile
