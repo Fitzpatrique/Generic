@@ -25,7 +25,7 @@ class Orders(db.Model):
     order_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     amount = db.Column(db.Integer, nullable=False)
     description = db.Column(db.Text, nullable=False)
-    order_status = db.Column(db.String, nullable=False, default='Unfulfilled')
+    order_status = db.Column(db.String, nullable=False, default='Fulfilled')
     shipping_address = db.Column(db.String(120), nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
 
@@ -49,11 +49,12 @@ class Products(db.Model):
     description = db.Column(db.Text, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     price = db.Column(db.Integer, nullable=False)
+    brand = db.Column(db.String(120), nullable=False)
     variant = db.Column(db.String(120), nullable=False)
     category = db.relationship('Category', backref='category_name', lazy=True)
 
     def __repr__(self): # how the object is printed whenever we print it out
-        return f"Products('{self.name}','{self.price}','{self.variant}')"
+        return f"Products('{self.name}','{self.price}','{self.brand}','{self.variant}')"
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
