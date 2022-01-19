@@ -4,11 +4,12 @@ from datetime import datetime
 from pypaystack import Transaction, Customer, Plan
 
 
+test_auth_key = "sk_test_e4fb7ba0afc400e619ea70b4c071c4930061d1d9"
+transaction = Transaction(authorization_key=test_auth_key)
 app = Flask(__name__)
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
-
 db = SQLAlchemy(app)
+
 
 class Customers(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -18,6 +19,7 @@ class Customers(db.Model):
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(120), nullable=False)
     orders = db.relationship('Orders', backref='customer_name', lazy=True)
+    cart = db.relationship('Cart', backref='customer_cart', lazy=True)
 
     def __repr__(self): # how the object is printed whenever we print it out
         return f"Customers('{self.first_name}','{self.last_name}','{self.email}')"
@@ -59,6 +61,7 @@ class Products(db.Model):
     variant = db.Column(db.String(120), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendors.id'), nullable=False)
+    cart_id = db.Column(db.Integer, db.ForeignKey('cart.id'), nullable=False)
 
     def __repr__(self): # how the object is printed whenever we print it out
         return f"Products('{self.name}','{self.price}','{self.brand}','{self.variant}')"
@@ -72,6 +75,45 @@ class Category(db.Model):
 
     def __repr__(self): # how the object is printed whenever we print it out
         return f"Category('{self.name}','{self.description}')"
+
+class Cart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_name = db.Column(db.Integer, db.ForeignKey('vendors.id'), nullable=False)
+    price = price = db.Column(db.Integer, nullable=False)
+    item_count = db.Column(db.Integer, nullable=False)
+    total_price = db.Column(db.Integer, nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
+
+
+def charge_and_verify():
+    global transaction
+    """
+    Integration test for initiating and verifying transactions
+    """
+    transaction_details = {
+        "amount": 1000*100,
+        "email": "test_customer@mail.com"
+    }
+    def initialize_transaction():
+        (status_code, status, response_msg,
+            initialized_transaction_data) = transaction.initialize(**transaction_details)
+        return initialized_transaction_data
+
+    def verify_transaction():
+        (status_code, status, response_msg, response_data) = transaction.verify(
+                reference=initialized_transaction_data['reference'])
+
+    initialized_transaction_data = initialize_transaction()
+    verify_transaction()
+        
+
+    
+
+
+
+
+
+
 
 
 @app.route('/', methods=['POST','GET'])
