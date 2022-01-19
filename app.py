@@ -1,6 +1,8 @@
-from datetime import datetime
 from flask import Flask, request, redirect, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+from pypaystack import Transaction, Customer, Plan
+
 
 app = Flask(__name__)
 
@@ -28,20 +30,24 @@ class Orders(db.Model):
     order_status = db.Column(db.String, nullable=False, default='Fulfilled')
     shipping_address = db.Column(db.String(120), nullable=False)
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'), nullable=False)
+    vendor_id = db.Column(db.Integer, db.ForeignKey('vendors.id'), nullable=False)
 
     def __repr__(self): # how the object is printed whenever we print it out
         return f"Orders('{self.order_date}','{self.amount}','{self.description}','{self.order_status}','{self.shipping_address}')"
 
-class Staff(db.Model):
+class Vendors(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(120), nullable=False)
-    last_name = db.Column(db.String(120), nullable=False)
+    last_name = db.Column(db.String(120), nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    job_title = db.Column(db.String(120), unique=True, nullable=False)
-    status = db.Column(db.String, nullable=False, default='Inactive')
+    password = db.Column(db.String(120), nullable=False)
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
+    address = db.Column(db.String(120), unique=True, nullable=False)
+    product = db.relationship('Products', backref='vendor_product', lazy=True)
+    orders = db.relationship('Orders', backref='vendor_order', lazy=True)
 
     def __repr__(self): # how the object is printed whenever we print it out
-        return f"Staff('{self.first_name}','{self.last_name}','{self.email}')"
+        return f"Vendors('{self.first_name}','{self.last_name}','{self.email}')"
 
 class Products(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -51,7 +57,8 @@ class Products(db.Model):
     price = db.Column(db.Integer, nullable=False)
     brand = db.Column(db.String(120), nullable=False)
     variant = db.Column(db.String(120), nullable=False)
-    category = db.relationship('Category', backref='category_name', lazy=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    vendor_id = db.Column(db.Integer, db.ForeignKey('vendors.id'), nullable=False)
 
     def __repr__(self): # how the object is printed whenever we print it out
         return f"Products('{self.name}','{self.price}','{self.brand}','{self.variant}')"
@@ -60,11 +67,12 @@ class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=True)
     description = db.Column(db.Text, nullable=False)
-    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg') 
+    product = db.relationship('Products', backref='product_name', lazy=True)
 
     def __repr__(self): # how the object is printed whenever we print it out
         return f"Category('{self.name}','{self.description}')"
+
 
 @app.route('/', methods=['POST','GET'])
 @app.route('/index', methods=['POST','GET'])
@@ -74,3 +82,5 @@ def index():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+print("Hello World")
